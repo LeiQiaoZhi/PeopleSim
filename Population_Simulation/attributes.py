@@ -50,6 +50,9 @@ class PhysicalAttributes:
     height: in terms of cm
     attractiveness: normally 0-1, mean 0.5, std 0.2
     '''
+    mean_male_height = 175
+    mean_female_height = 165
+
     def __init__(self, height, attractiveness) -> None:
         self.height = height
         self.attractiveness = attractiveness
@@ -63,9 +66,9 @@ class PhysicalAttributes:
     @staticmethod
     def _get_random_height(gender):
         if gender == 'Male':
-            mean, std = 175, 10
+            mean, std = PhysicalAttributes.mean_male_height, 10
         else:
-            mean, std = 165, 10
+            mean, std = PhysicalAttributes.mean_female_height, 10
         return random.normalvariate(mean, std)
 
     @staticmethod
@@ -74,6 +77,9 @@ class PhysicalAttributes:
 
 
 class MentalAttributes:
+    '''
+    social level: from 0 to 1
+    '''
     def __init__(self, social_level):
         self.social_level = social_level
 

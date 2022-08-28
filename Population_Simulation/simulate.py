@@ -18,7 +18,7 @@ def main():
     people = []
     for _ in range(args.start_pop):
         person = Person.generate_random_person()
-        print(person.get_description())
+        print(person.get_description(detail_level="full"))
         people.append(person)
 
     print(f"{args.start_pop} people created")
@@ -31,7 +31,7 @@ def main():
             person.grow_old() 
 
             # attempt to find mate
-            person.socialize()
+            person.socialize(people)
 
         # at last, filter out the dead
         people = list(filter(lambda p: p.alive, people))
@@ -46,6 +46,6 @@ if __name__ == '__main__':
 
 '''
 python ./Population_Simulation/simulate.py \
-    --start_pop=100 \
-    --sim_loop=100
+    --start_pop=20 \
+    --sim_loop=1
 '''
