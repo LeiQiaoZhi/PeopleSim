@@ -14,7 +14,7 @@ class HeightStandard:
 
     def __init__(
             self,
-            score_fn: Callable[[float], float],
+            score_fn: Callable[[any, float], float],
             std_name: str = "custom") -> None:
         self.score_fn = score_fn
         self.std_name = std_name
@@ -68,42 +68,63 @@ class HeightStandard:
 
     # region some common default hard standards
     @staticmethod
-    def HIGHER_THE_BETTER(half_score_height):
+    def HIGHER_THE_BETTER(half_score_height=None):
         '''
         half_score_height is the height that can achieve 0.5
         '''
-        def fn(height): return height / (height + half_score_height)
+
+        def fn(self, height):
+            if half_score_height == None:
+                return height / (height + self.physical_attrs.height)
+            return height / (height + half_score_height)
+
         return HeightStandard(fn, "higher the better")
 
     @staticmethod
-    def LOWER_THE_BETTER(half_score_height):
+    def LOWER_THE_BETTER(half_score_height=None):
         '''
         half_score_height is the height that can achieve 0.5
         '''
-        def fn(height):
+
+        def fn(self, height, half_score_height=half_score_height):
+            if half_score_height == None:
+                half_score_height = self.physical_attrs.height
             h = max(2 * half_score_height - height, 0)
             return h / (h + half_score_height)
+
         return HeightStandard(fn, "lower the better")
 
     @staticmethod
-    def MUST_ABOVE_HEIGHT(min_height):
-        def fn(height): return int(height >= min_height)
+    def MUST_ABOVE_HEIGHT(min_height=None):
+        '''
+        if no min_height given
+        assume it is above person's own height
+        '''
+
+        def fn(self, height, min_height=min_height):
+            if min_height == None:
+                min_height = self.physical_attrs.height
+            return int(height >= min_height)
+
         return HeightStandard(fn, f"must above {min_height} cm")
 
     @staticmethod
-    def MUST_BELOW_HEIGHT(max_height):
-        def fn(height): return int(height <= max_height)
+    def MUST_BELOW_HEIGHT(max_height=None):
+        def fn(self, height, max_height=max_height):
+            if max_height == None:
+                max_height = self.physical_attrs.height
+            return int(height <= max_height)
         return HeightStandard(fn, f"must below {max_height} cm")
 
     @staticmethod
-    def MUST_BETWEEN_HEIGHT(min_height, max_height):
+    def MUST_BETWEEN_HEIGHT(min_height=None, max_height=None):
         def fn(height): return int(height >= min_height
                                    and height <= max_height)
         return HeightStandard(fn, f"must between {min_height} and {max_height} cm")
 
     @staticmethod
     def NO_HEIGHT_STANDARD():
-        def fn(height): return 1
+        def fn(self, height): return 1
         return HeightStandard(fn, "indifferent")
     # endregion
 
