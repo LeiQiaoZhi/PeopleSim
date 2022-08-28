@@ -8,4 +8,5 @@ def get_mortality_rate(person, base=0.001):
     base on age 
     ideas: gender, health
     '''
+    # TODO: use a mortality function based on age
     return base
