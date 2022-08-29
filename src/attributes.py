@@ -1,17 +1,26 @@
 import random
 import math
 from typing import Tuple
+import os
+import sys
 
 
 class BasicAttributes:
     '''
     given name
+    surname
     age:  is in terms of months
     gender: Male, Female, Others
     '''
 
-    def __init__(self, given_name, age, gender) -> None:
+    def __init__(
+            self,
+            given_name: str,
+            surname: str,
+            age: int,
+            gender: str) -> None:
         self.given_name = given_name
+        self.surname = surname
         self.age = age
         self.gender = gender
 
@@ -19,8 +28,10 @@ class BasicAttributes:
     def get_random_attributes(age_bounds: Tuple[int, int] = (0, 1)):
         gender = BasicAttributes._get_random_gender()
         name = BasicAttributes._get_random_name(gender)
+        surname = BasicAttributes._get_random_surname()
         return BasicAttributes(
             given_name=name,
+            surname=surname,
             age=random.randrange(*age_bounds),
             gender=gender
         )
@@ -28,18 +39,34 @@ class BasicAttributes:
     @staticmethod
     def _get_random_gender():
         genders = ['Male', 'Female', 'Others']
-        return random.choice(genders)
+        weights = [0.4, 0.4, 0.2]
+        return random.choices(genders,weights=weights)[0]
 
     @staticmethod
     def _get_random_name(gender):
-        male_names = ['Albert', 'Bob', 'Calvin', 'Kevin']
-        female_names = ['Alice', 'Cath', 'Debula', 'Karen']
+        # read names from data
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        female_path = os.path.join(current_dir, "data", "female_names.txt")
+        with open(female_path) as f:
+            female_names = f.read().split('\n')
+        male_path = os.path.join(current_dir, "data", "male_names.txt")
+        with open(male_path) as f:
+            male_names = f.read().split('\n')
+
+        # random choice of name
         if gender == 'Male':
             return random.choice(male_names)
         elif gender == 'Female':
             return random.choice(female_names)
         else:
             return random.choice(male_names+female_names)
+
+    def _get_random_surname():
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        path = os.path.join(current_dir, "data", "male_names.txt")
+        with open(path) as f:
+            surnames = f.read().split('\n')
+        return random.choice(surnames)
 
     def get_age_in_years(self, exact=False):
         if exact:

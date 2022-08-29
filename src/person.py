@@ -46,7 +46,7 @@ class Person:
         desp = (
             f"uid: {self.id} \n"
             f"alive: {self.alive} \n"
-            f"name: {self.basic_attrs.given_name} \n"
+            f"name: {self.basic_attrs.given_name} {self.basic_attrs.surname} \n"
             f"age: {self.basic_attrs.get_age_in_years()} years old\n"
             f"gender: {self.basic_attrs.gender}"
         )

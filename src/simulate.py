@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
 
 '''
-python ./simulate.py \
-    --start_pop=200 \
-    --sim_loop=1
+python ./src/simulate.py \
+    --start_pop=20 \
+    --sim_loop=0
 '''
