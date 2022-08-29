@@ -4,6 +4,7 @@ from standards import PartnerStandards
 from typing import *
 import attr_funcs as F
 
+
 class Person:
     def __init__(
             self,
@@ -11,10 +12,10 @@ class Person:
             physical_attrs: PhysicalAttributes,
             mental_attrs: MentalAttributes,
             partner_stds: PartnerStandards,
-            alive = True,
-            acquaintances = [],
-            partner = None ) -> None:
-           
+            alive=True,
+            acquaintances=[],
+            partner=None) -> None:
+
         self.basic_attrs = basic_attrs
         self.physical_attrs = physical_attrs
         self.mental_attrs = mental_attrs
@@ -33,12 +34,13 @@ class Person:
         return self.basic_attrs.gender == 'Female'
 
     @staticmethod
-    def generate_random_person():
-        basic_attrs = BasicAttributes.get_random_attributes()
+    def generate_random_person(age_bounds: Tuple[int, int] = (0, 1)):
+        basic_attrs = BasicAttributes.get_random_attributes(age_bounds)
         physical_attrs = PhysicalAttributes.get_random_attributes(basic_attrs)
         mental_attrs = MentalAttributes.get_random_attributes()
-        partner_stds = PartnerStandards.generate_random_partner_standards(basic_attrs,physical_attrs)
-        return Person(basic_attrs,physical_attrs, mental_attrs, partner_stds)
+        partner_stds = PartnerStandards.generate_random_partner_standards(
+            basic_attrs, physical_attrs)
+        return Person(basic_attrs, physical_attrs, mental_attrs, partner_stds)
 
     def get_description(self, detail_level='basic', bounds=True):
         desp = (
@@ -59,7 +61,8 @@ class Person:
         )
         stds = (
             "\n === Partner Standards === \n"
-            f"height standard: {self.partner_stds.height_std.std_name}"
+            f"height standard: {self.partner_stds.height_std.std_name}\n"
+            f"age standard: {self.partner_stds.age_std.std_name}"
         )
         detail_levels = {
             'basic': desp,
@@ -89,11 +92,18 @@ class Person:
         else:
             return False
 
-    def socialize(self, people):
+    def socialize(self, people: List):
         '''
         choose who to socialise with, base on social_level
         give acquaintances scores
         attempt to propose to the one with highest score
         '''
         num_ppl_socialize = F.get_num_ppl_to_socialize(self.mental_attrs)
-        known_ppl = random.sample(people,num_ppl_socialize)[:num_ppl_socialize]
+        known_ppl = random.sample(people, num_ppl_socialize)[
+            :num_ppl_socialize]
+        if self in known_ppl:
+            num_ppl_socialize -= 1
+            known_ppl.remove(self)
+        print(
+            f"{self.id} decides to socialize with {num_ppl_socialize} people:\n {[p.id for p in known_ppl]}")
+        return num_ppl_socialize

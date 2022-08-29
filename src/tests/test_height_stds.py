@@ -75,9 +75,9 @@ class TestHeightStds(unittest.TestCase):
         person = Person.generate_random_person()
         std = HeightStandard.NO_HEIGHT_STANDARD()
         score = std.score_fn(person, 0)
-        self.assertEqual(score, 1)
+        self.assertEqual(score, 0.5)
         score = std.score_fn(person, 180)
-        self.assertEqual(score, 1)
+        self.assertEqual(score, 0.5)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 import random
 import math
+from typing import Tuple
+
 
 class BasicAttributes:
     '''
@@ -14,12 +16,12 @@ class BasicAttributes:
         self.gender = gender
 
     @staticmethod
-    def get_random_attributes():
+    def get_random_attributes(age_bounds: Tuple[int, int] = (0, 1)):
         gender = BasicAttributes._get_random_gender()
         name = BasicAttributes._get_random_name(gender)
         return BasicAttributes(
             given_name=name,
-            age=0,
+            age=random.randrange(*age_bounds),
             gender=gender
         )
 
@@ -61,7 +63,7 @@ class PhysicalAttributes:
     def get_random_attributes(basic_attr: BasicAttributes):
         height = PhysicalAttributes._get_random_height(basic_attr.gender)
         attractiveness = PhysicalAttributes._get_random_attractiveness()
-        return PhysicalAttributes(height,attractiveness)
+        return PhysicalAttributes(height, attractiveness)
 
     @staticmethod
     def _get_random_height(gender):
@@ -73,13 +75,14 @@ class PhysicalAttributes:
 
     @staticmethod
     def _get_random_attractiveness():
-        return random.normalvariate(0.5,0.2)
+        return random.normalvariate(0.5, 0.2)
 
 
 class MentalAttributes:
     '''
     social level: from 0 to 1
     '''
+
     def __init__(self, social_level):
         self.social_level = social_level
 
@@ -90,5 +93,5 @@ class MentalAttributes:
 
     @staticmethod
     def _get_random_social_level():
-        social_level = random.normalvariate(0.5,0.3)
-        return min(max(social_level,0),1)
+        social_level = random.normalvariate(0.5, 0.3)
+        return min(max(social_level, 0), 1)
