@@ -1,9 +1,11 @@
 from person import *
 import argparse
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
+import utils.plotter
 
-writer = SummaryWriter()
+# writer = SummaryWriter()
+plotter = utils.plotter.Plotter()
 
 
 def main():
@@ -26,8 +28,10 @@ def main():
     print(f"{args.start_pop} people created")
 
     ### Simulation Loop ###
-    nums = []
-    socials = []
+    nums_social = []
+    nums_acquant = []
+    social_levels = []
+
     for step in range(args.sim_loop):
         print(f"***** Begining of loop {step} *****")
         for person in people:
@@ -35,21 +39,21 @@ def main():
             person.grow_old()
 
             # attempt to find mate
-            num_social = person.socialize(people)
+            num_social, num_acquaint = person.socialize(people)
 
-            nums.append(num_social)
-            socials.append(person.mental_attrs.social_level)
+            plotter.add_scatter("social level vs num social", person.mental_attrs.social_level,
+                                num_social, xlabel="social_level", ylabel="num_social")
+            plotter.add_scatter("social level vs num acquaint", person.mental_attrs.social_level,
+                                num_acquaint, xlabel="social_level", ylabel="num_acquaint")
 
         # at last, filter out the dead
         people = list(filter(lambda p: p.alive, people))
-        writer.add_scalar('Population', len(people), step)
+        plotter.add_scalar('Population', y=len(people), x=step,
+                           xlabel='steps', ylabel='population')
         print(f"Population size is {len(people)}")
 
-        # TODO: make the plt somewhere else
-        fig = plt.figure()
-        plt.scatter(nums, socials)
-        writer.add_figure("matplot", fig)
-        writer.flush()
+        # DONE: make the plt somewhere else
+        plotter.plot()
 
 
 if __name__ == '__main__':
@@ -58,6 +62,6 @@ if __name__ == '__main__':
 
 '''
 python ./src/simulate.py \
-    --start_pop=20 \
-    --sim_loop=0
+    --start_pop=100 \
+    --sim_loop=1
 '''

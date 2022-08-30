@@ -13,7 +13,7 @@ class Person:
             mental_attrs: MentalAttributes,
             partner_stds: PartnerStandards,
             alive=True,
-            acquaintances=[],
+            # acquaintances: Dict[str, float],
             partner=None) -> None:
 
         self.basic_attrs = basic_attrs
@@ -21,16 +21,20 @@ class Person:
         self.mental_attrs = mental_attrs
         self.partner_stds = partner_stds
         self.alive = alive
-        self.aquaintances = acquaintances
+        self.acquaintances: Dict[str, float] = dict()
         self.partner = partner
 
         # generate unique id
-        self.id = F.get_unique_id(self.basic_attrs)
+        self.id = F.get_unique_id(self.basic_attrs, self.mental_attrs)
 
-    def is_Male(self):
+    ### Getters ###
+    def is_alive(self):
+        return self.alive
+
+    def is_male(self):
         return self.basic_attrs.gender == 'Male'
 
-    def is_Female(self):
+    def is_female(self):
         return self.basic_attrs.gender == 'Female'
 
     @staticmethod
@@ -96,14 +100,31 @@ class Person:
         '''
         choose who to socialise with, base on social_level
         give acquaintances scores
-        attempt to propose to the one with highest score
         '''
         num_ppl_socialize = F.get_num_ppl_to_socialize(self.mental_attrs)
-        known_ppl = random.sample(people, num_ppl_socialize)[
+        known_ppl: List[Person] = random.sample(people, num_ppl_socialize)[
             :num_ppl_socialize]
         if self in known_ppl:
             num_ppl_socialize -= 1
             known_ppl.remove(self)
+        scores = [self.partner_stds.score(self, p) for p in known_ppl]
+
+        # add known_ppl to aquaintances
+        for p, score in zip(known_ppl, scores):
+            self.acquaintances[p.id] = score
+
+            # add self to others
+            self_score = p.partner_stds.score(p, self)
+            p.acquaintances[self.id] = self_score
+
         print(
-            f"{self.id} decides to socialize with {num_ppl_socialize} people:\n {[p.id for p in known_ppl]}")
-        return num_ppl_socialize
+            f'{"="*50}\n'
+            f"{self.basic_attrs.given_name + ' ' + self.basic_attrs.surname} "
+            f"with social level {self.mental_attrs.social_level:.2f} "
+            f"decides to socialize with {num_ppl_socialize} people:"
+            f"\n {[p.basic_attrs.given_name + ' ' + p.basic_attrs.surname for p in known_ppl]}"
+            f"\n scores: {scores}"
+            f"\n aquaintances: {len(self.acquaintances)}"
+            f"\n age: {self.partner_stds.age_std.std_name} height: {self.partner_stds.height_std.std_name}"
+        )
+        return num_ppl_socialize, len(self.acquaintances)

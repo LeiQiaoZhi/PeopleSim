@@ -3,6 +3,7 @@ import math
 from attributes import *
 from typing import Callable
 import random
+import utils.util_funcs as U
 
 
 class HeightStandard:
@@ -73,10 +74,11 @@ class HeightStandard:
         half_score_height is the height that can achieve 0.5
         '''
 
-        def fn(self, height):
+        def fn(self, height, half_score_height=half_score_height):
             if half_score_height == None:
-                return height / (height + self.physical_attrs.height)
-            return height / (height + half_score_height)
+                half_score_height = self.physical_attrs.height
+            # return height / (height + half_score_height)
+            return U.sigmoid(height, mid_point=half_score_height, rate=8)
 
         return HeightStandard(fn, "higher the better")
 
@@ -90,7 +92,8 @@ class HeightStandard:
             if half_score_height == None:
                 half_score_height = self.physical_attrs.height
             h = max(2 * half_score_height - height, 0)
-            return h / (h + half_score_height)
+            # return h / (h + half_score_height)
+            return U.sigmoid(h, mid_point=half_score_height, rate=8)
 
         return HeightStandard(fn, "lower the better")
 

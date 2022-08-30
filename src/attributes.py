@@ -40,7 +40,7 @@ class BasicAttributes:
     def _get_random_gender():
         genders = ['Male', 'Female', 'Others']
         weights = [0.4, 0.4, 0.2]
-        return random.choices(genders,weights=weights)[0]
+        return random.choices(genders, weights=weights)[0]
 
     @staticmethod
     def _get_random_name(gender):
@@ -63,7 +63,7 @@ class BasicAttributes:
 
     def _get_random_surname():
         current_dir = os.path.dirname(os.path.realpath(__file__))
-        path = os.path.join(current_dir, "data", "male_names.txt")
+        path = os.path.join(current_dir, "data", "surnames.txt")
         with open(path) as f:
             surnames = f.read().split('\n')
         return random.choice(surnames)

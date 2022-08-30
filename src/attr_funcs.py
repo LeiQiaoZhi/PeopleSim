@@ -2,16 +2,20 @@ import random
 import uuid
 from attributes import *
 
-def get_unique_id(basic_attrs: BasicAttributes):
+
+def get_unique_id(basic_attrs: BasicAttributes, mental_attrs: MentalAttributes):
     gender_to_id = {
         'Male': 'M',
         'Female': 'F',
         'Others': 'O'
     }
-    uid = [gender_to_id[basic_attrs.gender] 
-        , basic_attrs.given_name 
-        , str(uuid.uuid1())]
+    uid = [gender_to_id.get(basic_attrs.gender),
+           basic_attrs.given_name,
+           basic_attrs.surname,
+           'I' if mental_attrs.social_level < 0.5 else 'E',
+           str(uuid.uuid1())]
     return '-'.join(uid)
+
 
 def get_mortality_rate(basic_attrs, base=0.001):
     '''
@@ -30,4 +34,4 @@ def get_num_ppl_to_socialize(mental_attrs: MentalAttributes):
     base on the person's social level
     '''
     social_level = mental_attrs.social_level
-    return max(0, round(random.normalvariate(social_level*5,1)))
+    return max(0, round(random.normalvariate(social_level*5, 1)))
