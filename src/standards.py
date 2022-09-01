@@ -5,20 +5,68 @@ from typing import Callable
 import random
 import utils.util_funcs as U
 
+class Standard:
+    def __init__(
+            self,
+            score_fn: Callable[[any, float], float], 
+            std_name: str = "custom") -> None:
+        '''
+        score_fn (self:Person, other person's trait) -> score
+        '''
+        self.score_fn = score_fn
+        self.std_name = std_name
 
-class HeightStandard:
+class AttractivenessStandard(Standard):
+    @staticmethod
+    def generate_random_std():
+        stds = [
+            AttractivenessStandard.INDIFFERNT(),
+            AttractivenessStandard.LINEAR_HIGHER_THE_BETTER(),
+            AttractivenessStandard.SIMILAR_THE_BETTER(),
+            AttractivenessStandard.HIGH_STANDARD(),
+        ]
+        weights = [0.1,0.4,0.4,0.1]
+        std = random.choices(stds, weights=weights)
+        return std[0]
+
+    @staticmethod
+    def INDIFFERNT():
+        return AttractivenessStandard(
+            lambda self,a : 0.5,
+            "indifferent"
+        )
+
+    @staticmethod
+    def LINEAR_HIGHER_THE_BETTER():
+        return AttractivenessStandard(
+            lambda self,a: a,
+            "linear higher the better"
+        )
+
+    @staticmethod
+    def SIMILAR_THE_BETTER():
+        return AttractivenessStandard(
+            lambda self,a : U.sigmoid(a,
+                mid_point=self.physical_attrs.attractiveness,
+                rate=0.1),
+            "similar the better"
+        )
+
+    @staticmethod
+    def HIGH_STANDARD():
+        return AttractivenessStandard(
+            lambda self,a : U.sigmoid(a,
+                mid_point=0.7,
+                rate=0.08),
+            "high standard"
+        )
+
+class HeightStandard(Standard):
     '''
     has a score_fn field
     which is a function that takes in height
         and returns a score between 0 and 1
     '''
-
-    def __init__(
-            self,
-            score_fn: Callable[[any, float], float],
-            std_name: str = "custom") -> None:
-        self.score_fn = score_fn
-        self.std_name = std_name
 
     @staticmethod
     def get_random_height_std(
@@ -69,16 +117,16 @@ class HeightStandard:
 
     # region some common default hard standards
     @staticmethod
-    def HIGHER_THE_BETTER(half_score_height=None):
+    def HIGHER_THE_BETTER(half_score_height=None, rate=8):
         '''
         half_score_height is the height that can achieve 0.5
         '''
 
-        def fn(self, height, half_score_height=half_score_height):
+        def fn(self, height, half_score_height=half_score_height,rate=rate):
             if half_score_height == None:
                 half_score_height = self.physical_attrs.height
             # return height / (height + half_score_height)
-            return U.sigmoid(height, mid_point=half_score_height, rate=8)
+            return U.sigmoid(height, mid_point=half_score_height, rate=rate)
 
         return HeightStandard(fn, "higher the better")
 
@@ -137,13 +185,7 @@ class HeightStandard:
     # endregion
 
 
-class AgeStandard:
-    def __init__(
-            self,
-            score_fn: Callable[[any, int], float],
-            std_name: str = 'custom'):
-        self.score_fn = score_fn
-        self.std_name = std_name
+class AgeStandard(Standard):
 
     @staticmethod
     def get_random_age_std(basic_attrs: BasicAttributes):
@@ -222,10 +264,12 @@ class PartnerStandards:
     def __init__(
             self,
             height_std: HeightStandard,
-            age_std: AgeStandard) -> None:
+            age_std: AgeStandard,
+            attractive_std: AttractivenessStandard) -> None:
 
         self.height_std = height_std
         self.age_std = age_std
+        self.attractive_std = attractive_std
 
     def score(self, my_person, candidate) -> float:
         '''
@@ -250,4 +294,5 @@ class PartnerStandards:
         height_std = HeightStandard.get_random_height_std(
             basic_attrs, physical_attrs)
         age_std = AgeStandard.get_random_age_std(basic_attrs)
-        return PartnerStandards(height_std, age_std)
+        attractive_std = AttractivenessStandard.generate_random_std()
+        return PartnerStandards(height_std, age_std, attractive_std)
