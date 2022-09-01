@@ -28,19 +28,22 @@ def main():
     print(f"{args.start_pop} people created")
 
     ### Simulation Loop ###
-    nums_social = []
-    nums_acquant = []
-    social_levels = []
-
     for step in range(args.sim_loop):
         print(f"***** Begining of loop {step} *****")
+        num_match = 0
         for person in people:
             # increase age and check for natural death
             person.grow_old()
 
-            # attempt to find mate
+            # attempt to find mates
             num_social, num_acquaint = person.socialize(people)
+            person.rank_acquaintances(people)
+            found_math = person.find_match()
 
+            if found_math:
+                num_match += 1
+
+            # plots
             plotter.add_scatter("social level vs num social", person.mental_attrs.social_level,
                                 num_social, xlabel="social_level", ylabel="num_social")
             plotter.add_scatter("social level vs num acquaint", person.mental_attrs.social_level,
@@ -50,7 +53,12 @@ def main():
         people = list(filter(lambda p: p.alive, people))
         plotter.add_scalar('Population', y=len(people), x=step,
                            xlabel='steps', ylabel='population')
-        print(f"Population size is {len(people)}")
+        plotter.add_scalar('Match found', y=num_match, x=step,
+                           xlabel='steps', ylabel='matchs found')
+
+        Logger.print_title("Stats")
+        print(f"Total match foudn is {Logger.red(num_match)}")
+        print(f"Population size is {Logger.red(len(people))}")
 
         # DONE: make the plt somewhere else
         plotter.plot()

@@ -12,6 +12,7 @@ class BasicAttributes:
     age:  is in terms of months
     gender: Male, Female, Others
     '''
+    GENDERS = ['Male', 'Female', 'Others']
 
     def __init__(
             self,
@@ -38,9 +39,8 @@ class BasicAttributes:
 
     @staticmethod
     def _get_random_gender():
-        genders = ['Male', 'Female', 'Others']
         weights = [0.4, 0.4, 0.2]
-        return random.choices(genders, weights=weights)[0]
+        return random.choices(BasicAttributes.GENDERS, weights=weights)[0]
 
     @staticmethod
     def _get_random_name(gender):

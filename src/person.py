@@ -3,6 +3,8 @@ from attributes import *
 from standards import PartnerStandards
 from typing import *
 import attr_funcs as F
+import utils.util_funcs as U
+from utils.logger import Logger
 
 
 class Person:
@@ -13,7 +15,6 @@ class Person:
             mental_attrs: MentalAttributes,
             partner_stds: PartnerStandards,
             alive=True,
-            # acquaintances: Dict[str, float],
             partner=None) -> None:
 
         self.basic_attrs = basic_attrs
@@ -21,13 +22,21 @@ class Person:
         self.mental_attrs = mental_attrs
         self.partner_stds = partner_stds
         self.alive = alive
-        self.acquaintances: Dict[str, float] = dict()
         self.partner = partner
+
+        # non-param fields
+        self.acquaintances: Dict[str, float] = dict()
+        self.target = None
 
         # generate unique id
         self.id = F.get_unique_id(self.basic_attrs, self.mental_attrs)
 
     ### Getters ###
+    def is_equal(self, person):
+        if person == None:
+            return False
+        return self.id == person.id
+
     def is_alive(self):
         return self.alive
 
@@ -36,6 +45,17 @@ class Person:
 
     def is_female(self):
         return self.basic_attrs.gender == 'Female'
+
+    def get_pronoun(self):
+        pronoun_dict = {
+            'Male': 'he',
+            'Female': 'she',
+            'Others': 'they'
+        }
+        return pronoun_dict[self.basic_attrs.gender]
+
+    def get_full_name(self):
+        return f"{self.basic_attrs.given_name} {self.basic_attrs.surname}"
 
     @staticmethod
     def generate_random_person(age_bounds: Tuple[int, int] = (0, 1)):
@@ -118,13 +138,42 @@ class Person:
             p.acquaintances[self.id] = self_score
 
         print(
-            f'{"="*50}\n'
-            f"{self.basic_attrs.given_name + ' ' + self.basic_attrs.surname} "
+            f'{Logger.divider()}\n'
+            f"{Logger.yellow(self.get_full_name())} "
             f"with social level {self.mental_attrs.social_level:.2f} "
             f"decides to socialize with {num_ppl_socialize} people:"
-            f"\n {[p.basic_attrs.given_name + ' ' + p.basic_attrs.surname for p in known_ppl]}"
+            f"\n {[p.get_full_name() for p in known_ppl]}"
             f"\n scores: {scores}"
             f"\n aquaintances: {len(self.acquaintances)}"
             f"\n age: {self.partner_stds.age_std.std_name} height: {self.partner_stds.height_std.std_name}"
         )
+
         return num_ppl_socialize, len(self.acquaintances)
+
+    def rank_acquaintances(self, people):
+        if len(self.acquaintances) == 0:
+            print(f"\n{self.get_full_name()} is lonely."
+                  f"{self.get_pronoun()} choose to socialize with no one.")
+            return
+
+        # rank acquantances by scores
+        ranked = sorted(self.acquaintances.items(), key=lambda x: x[1],
+                        reverse=True)
+
+        target_id, score = ranked[0]
+        target: Person = U.find_person_by_id(people, target_id)
+        self.target = target
+        print(
+            f"{Logger.yellow(self.get_full_name())}'s target is {Logger.cyan(target.get_full_name())}, with a score of {score:.2f}.")
+
+    def find_match(self) -> bool:
+        if self.target == None:
+            print(f"{Logger.bold(self.get_full_name())} has no target.")
+            return False
+        if self.is_equal(self.target.target):
+            Logger.print_title("Match found!")
+            print(f"{Logger.yellow(self.get_full_name())} forms a match with "
+                  f"{Logger.cyan(self.target.get_full_name())}")
+            return True
+        print(f"No match found :(")
+        return False

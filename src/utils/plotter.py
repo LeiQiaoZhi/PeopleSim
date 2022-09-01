@@ -2,6 +2,7 @@ from turtle import title
 import matplotlib.pyplot as plt
 from typing import *
 import os
+from utils.logger import Logger
 
 
 class PlotData:
@@ -46,7 +47,7 @@ class ScatterData(PlotData):
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         save_path = os.path.join(os.path.dirname(current_dir), 'plots',
-                                 f'{self.xlabel}_vs_{self.ylabel}.png')
+                                 f'{self.ylabel}_vs_{self.xlabel}.png')
         plt.savefig(save_path)
         print(f"{title} saved to {save_path}")
 
@@ -69,7 +70,7 @@ class Plotter:
         self.plot_data[graph_name].add_entry(x, y)
 
     def plot(self) -> None:
-        print(f"\n***** Plotting Graphs *****\n")
+        Logger.print_title("Plotting Graphs")
         for name, data in self.plot_data.items():
             data.plot(title=name)
-        print("Graphs Saved")
+        Logger.print_title("Graphs Saved")
