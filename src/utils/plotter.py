@@ -16,6 +16,12 @@ class PlotData:
         self.X.append(x)
         self.Y.append(y)
 
+    def get_save_path(self) -> str:
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        save_path = os.path.join(os.path.dirname(current_dir), 'plots',
+                                 f'{self.ylabel}_vs_{self.xlabel}.png')
+        return save_path
+
     def plot(self):
         pass
 
@@ -29,11 +35,9 @@ class LineData(PlotData):
         ax.set_ylabel(self.ylabel)
         ax.set_title(title)
 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        save_path = os.path.join(os.path.dirname(current_dir), 'plots',
-                                 f'{self.xlabel}_vs_{self.ylabel}.png')
+        save_path = self.get_save_path()
         plt.savefig(save_path)
-        print(f"{title} saved to {save_path}")
+        Logger.info(f"{title} saved to {save_path}")
 
 
 class ScatterData(PlotData):
@@ -45,11 +49,9 @@ class ScatterData(PlotData):
         ax.set_ylabel(self.ylabel)
         ax.set_title(title)
 
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        save_path = os.path.join(os.path.dirname(current_dir), 'plots',
-                                 f'{self.ylabel}_vs_{self.xlabel}.png')
+        save_path = self.get_save_path()
         plt.savefig(save_path)
-        print(f"{title} saved to {save_path}")
+        Logger.info(f"{title} saved to {save_path}")
 
 
 class Plotter:
@@ -73,4 +75,4 @@ class Plotter:
         Logger.print_title("Plotting Graphs")
         for name, data in self.plot_data.items():
             data.plot(title=name)
-        Logger.print_title("Graphs Saved")
+        Logger.important("Graphs Saved", color=Logger.GREEN)

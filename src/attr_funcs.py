@@ -1,6 +1,7 @@
 import random
 import uuid
 from attributes import *
+import utils.util_funcs as U
 
 
 def get_unique_id(basic_attrs: BasicAttributes, mental_attrs: MentalAttributes):
@@ -17,15 +18,21 @@ def get_unique_id(basic_attrs: BasicAttributes, mental_attrs: MentalAttributes):
     return '-'.join(uid)
 
 
-def get_mortality_rate(basic_attrs, base=0.001):
+def get_mortality_rate(basic_attrs: BasicAttributes, base=0.001):
     '''
-    return the chance of natural death of a person
+    Returns:
+    the chance of natural death of a person
 
-    base on age 
+    base on age (in years)
     ideas: gender, health
+
+    function:
+        f\left(x\right)=\frac{1}{1+e^{-\frac{x-100}{10}}}
     '''
-    # TODO: use a mortality function based on age
-    return base
+    age = basic_attrs.get_age_in_years()
+    return U.sigmoid(age,
+                     mid_point=100,
+                     rate=10)
 
 
 def get_num_ppl_to_socialize(mental_attrs: MentalAttributes):

@@ -1,5 +1,6 @@
 import math
 from typing import *
+import numpy as np
 
 
 def sigmoid(x: float, mid_point: float = 0, rate: float = 8) -> float:
@@ -17,3 +18,10 @@ def find_person_by_id(people, target_id):
     '''
     filtered = list(filter(lambda p: p.id == target_id, people))
     return filtered[0] if len(filtered) > 0 else None
+
+
+def weighted_sum(lis, weights) -> float:
+    '''
+    dot product between two lists
+    '''
+    return np.array(lis) @ np.array(weights)

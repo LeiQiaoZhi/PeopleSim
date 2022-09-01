@@ -5,16 +5,18 @@ from typing import Callable
 import random
 import utils.util_funcs as U
 
+
 class Standard:
     def __init__(
             self,
-            score_fn: Callable[[any, float], float], 
+            score_fn: Callable[[any, float], float],
             std_name: str = "custom") -> None:
         '''
         score_fn (self:Person, other person's trait) -> score
         '''
         self.score_fn = score_fn
         self.std_name = std_name
+
 
 class AttractivenessStandard(Standard):
     @staticmethod
@@ -25,41 +27,42 @@ class AttractivenessStandard(Standard):
             AttractivenessStandard.SIMILAR_THE_BETTER(),
             AttractivenessStandard.HIGH_STANDARD(),
         ]
-        weights = [0.1,0.4,0.4,0.1]
+        weights = [0.1, 0.4, 0.4, 0.1]
         std = random.choices(stds, weights=weights)
         return std[0]
 
     @staticmethod
     def INDIFFERNT():
         return AttractivenessStandard(
-            lambda self,a : 0.5,
+            lambda self, a: 0.5,
             "indifferent"
         )
 
     @staticmethod
     def LINEAR_HIGHER_THE_BETTER():
         return AttractivenessStandard(
-            lambda self,a: a,
+            lambda self, a: a,
             "linear higher the better"
         )
 
     @staticmethod
     def SIMILAR_THE_BETTER():
         return AttractivenessStandard(
-            lambda self,a : U.sigmoid(a,
-                mid_point=self.physical_attrs.attractiveness,
-                rate=0.1),
+            lambda self, a: U.sigmoid(a,
+                                      mid_point=self.physical_attrs.attractiveness,
+                                      rate=0.1),
             "similar the better"
         )
 
     @staticmethod
     def HIGH_STANDARD():
         return AttractivenessStandard(
-            lambda self,a : U.sigmoid(a,
-                mid_point=0.7,
-                rate=0.08),
+            lambda self, a: U.sigmoid(a,
+                                      mid_point=0.7,
+                                      rate=0.08),
             "high standard"
         )
+
 
 class HeightStandard(Standard):
     '''
@@ -122,7 +125,7 @@ class HeightStandard(Standard):
         half_score_height is the height that can achieve 0.5
         '''
 
-        def fn(self, height, half_score_height=half_score_height,rate=rate):
+        def fn(self, height, half_score_height=half_score_height, rate=rate):
             if half_score_height == None:
                 half_score_height = self.physical_attrs.height
             # return height / (height + half_score_height)
@@ -284,8 +287,14 @@ class PartnerStandards:
             my_person,
             candidate.basic_attrs.age
         )
+        attractiveness_score = self.attractive_std.score_fn(
+            my_person,
+            candidate.physical_attrs.attractiveness
+        )
         # TODO: finish score fn, with weights
-        return height_score + age_score
+        scores = [height_score, age_score, attractiveness_score]
+        weights = [1, 1, 1]
+        return U.weighted_sum(scores, weights)
 
     @staticmethod
     def generate_random_partner_standards(

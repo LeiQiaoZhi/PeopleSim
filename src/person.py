@@ -57,6 +57,9 @@ class Person:
     def get_full_name(self):
         return f"{self.basic_attrs.given_name} {self.basic_attrs.surname}"
 
+    def partner_score(self, candidate) -> float:
+        return self.partner_stds.score(self, candidate)
+
     @staticmethod
     def generate_random_person(age_bounds: Tuple[int, int] = (0, 1)):
         basic_attrs = BasicAttributes.get_random_attributes(age_bounds)
@@ -70,32 +73,33 @@ class Person:
         desp = (
             f"uid: {self.id} \n"
             f"alive: {self.alive} \n"
-            f"name: {self.basic_attrs.given_name} {self.basic_attrs.surname} \n"
+            f"name: {Logger.yellow(self.get_full_name())} \n"
             f"age: {self.basic_attrs.get_age_in_years()} years old\n"
             f"gender: {self.basic_attrs.gender}"
         )
         mental_desp = (
-            "\n === Mental Attrs === \n"
+            f"{Logger.title('Mental Attrs',char='=',length=3)}"
             f"social level: {self.mental_attrs.social_level:.2f}"
         )
         physical_desp = (
-            "\n === Physical Attrs === \n"
+            f"{Logger.title('Physical Attrs',char='=',length=3)}"
             f"height: {self.physical_attrs.height:.2f} cm \n"
             f"attractiveness: {self.physical_attrs.attractiveness:.2f}"
         )
         stds = (
-            "\n === Partner Standards === \n"
+            f"{Logger.title('Partner Standards',char='=',length=3)}"
             f"height standard: {self.partner_stds.height_std.std_name}\n"
-            f"age standard: {self.partner_stds.age_std.std_name}"
+            f"age standard: {self.partner_stds.age_std.std_name} \n"
+            f"attractiveness standard: {self.partner_stds.attractive_std.std_name}"
         )
         detail_levels = {
             'basic': desp,
             'detailed': desp + mental_desp + physical_desp,
-            'full': desp + mental_desp + physical_desp + stds,
+            'full': '\n'.join([desp, mental_desp, physical_desp, stds]),
         }
         desp = detail_levels[detail_level]
         if bounds:
-            desp = "-"*30 + '\n' + desp + '\n' + '-'*30
+            desp = "="*30 + '\n' + desp + '\n' + '='*30
         return desp
 
     def grow_old(self) -> bool:
@@ -111,7 +115,7 @@ class Person:
             death_msg = f"{self.basic_attrs.given_name} has died "\
                 f"at age {self.basic_attrs.get_age_in_years()}"\
                 f", cause: natural death"
-            print(death_msg)
+            Logger.important(death_msg, color=Logger.DARKCYAN)
             return True
         else:
             return False
@@ -127,17 +131,17 @@ class Person:
         if self in known_ppl:
             num_ppl_socialize -= 1
             known_ppl.remove(self)
-        scores = [self.partner_stds.score(self, p) for p in known_ppl]
+        scores = [self.partner_score(p) for p in known_ppl]
 
         # add known_ppl to aquaintances
         for p, score in zip(known_ppl, scores):
             self.acquaintances[p.id] = score
 
             # add self to others
-            self_score = p.partner_stds.score(p, self)
+            self_score = p.partner_score(self)
             p.acquaintances[self.id] = self_score
 
-        print(
+        Logger.info(
             f'{Logger.divider()}\n'
             f"{Logger.yellow(self.get_full_name())} "
             f"with social level {self.mental_attrs.social_level:.2f} "
@@ -145,15 +149,17 @@ class Person:
             f"\n {[p.get_full_name() for p in known_ppl]}"
             f"\n scores: {scores}"
             f"\n aquaintances: {len(self.acquaintances)}"
-            f"\n age: {self.partner_stds.age_std.std_name} height: {self.partner_stds.height_std.std_name}"
+            f"\n age: {self.partner_stds.age_std.std_name} |"
+            f"height: {self.partner_stds.height_std.std_name} |"
+            f"attrnss: {self.partner_stds.attractive_std.std_name}"
         )
 
         return num_ppl_socialize, len(self.acquaintances)
 
     def rank_acquaintances(self, people):
         if len(self.acquaintances) == 0:
-            print(f"\n{self.get_full_name()} is lonely."
-                  f"{self.get_pronoun()} choose to socialize with no one.")
+            Logger.info(f"\n{self.get_full_name()} is lonely."
+                        f"{self.get_pronoun()} choose to socialize with no one.")
             return
 
         # rank acquantances by scores
@@ -162,18 +168,56 @@ class Person:
 
         target_id, score = ranked[0]
         target: Person = U.find_person_by_id(people, target_id)
+        if target == None:
+            Logger.warn(f"cannot find person with id{target_id}")
+            return
         self.target = target
-        print(
-            f"{Logger.yellow(self.get_full_name())}'s target is {Logger.cyan(target.get_full_name())}, with a score of {score:.2f}.")
+        Logger.info(
+            f"{Logger.yellow(self.get_full_name())}'s target is "
+            f"{Logger.cyan(target.get_full_name())}, "
+            f"with a score of {score:.2f}.")
 
     def find_match(self) -> bool:
+        match_result = {"result": "", "target target": None,
+                        "target target score": None, "self score": None}
         if self.target == None:
-            print(f"{Logger.bold(self.get_full_name())} has no target.")
-            return False
+            Logger.info(f"{Logger.bold(self.get_full_name())} has no target.")
+            match_result['result'] = "No target"
+            return False, match_result
         if self.is_equal(self.target.target):
-            Logger.print_title("Match found!")
-            print(f"{Logger.yellow(self.get_full_name())} forms a match with "
-                  f"{Logger.cyan(self.target.get_full_name())}")
-            return True
-        print(f"No match found :(")
-        return False
+            Logger.info(Logger.bold("<Match found>"))
+            Logger.info(f"{Logger.yellow(self.get_full_name())} forms a match with "
+                        f"{Logger.cyan(self.target.get_full_name())}")
+            match_result['result'] = "Match found"
+            return True, match_result
+        elif self.target.target == None:
+            # shouldn't really happen
+            Logger.warn("Target is none")
+            Logger.warn(f"{self.target.acquaintances}")
+            return False, match_result
+
+        Logger.info(
+            f"No match found for {Logger.yellow(self.get_full_name())} :(")
+
+        Logger.info(f"{Logger.cyan(self.target.get_full_name())}'s target is "
+                    f"{Logger.purple(self.target.target.get_full_name())} "
+                    f"with a score of {Logger.bold(f'{self.target.partner_score(self.target.target):.2f}')}, "
+                    f"while your score is {Logger.bold(f'{self.target.partner_score(self):.2f}')}")
+
+        match_result = {
+            "result": "",
+            "target target": self.target.target.get_full_name(),
+            "target target score": round(self.target.partner_score(self.target.target), 2),
+            "self score": round(self.target.partner_score(self), 2)
+        }
+        match_result['result'] = "No match"
+        return False, match_result
+
+    def post_social(self):
+        '''
+        called after each social step,
+        some acquantances fade away from life,
+        for now, just hard reset
+        '''
+        self.acquaintances = {}
+        self.target = None

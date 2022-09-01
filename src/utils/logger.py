@@ -1,5 +1,7 @@
 from turtle import title
 
+# TODO: create instance that can change log level
+
 
 class Logger:
     PURPLE = '\033[95m'
@@ -13,13 +15,63 @@ class Logger:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
+    DEBUG = 0
+    INFO = 1
+    IMPORTANT = 2
+    TITLE = 3
+    WARNING = 4
+    ERROR = 5
+
+    LEVEL = 1
+
+    @staticmethod
+    def set_level(level: int):
+        Logger.LEVEL = level
+
+    ### print methods ###
+    @staticmethod
+    def debug(text):
+        if Logger.LEVEL > Logger.DEBUG:
+            return
+        print(text)
+
+    @staticmethod
+    def info(text):
+        if Logger.LEVEL > Logger.INFO:
+            return
+        print(text)
+
+    @staticmethod
+    def important(text, color=None):
+        if Logger.LEVEL > Logger.IMPORTANT:
+            return
+        if color != None:
+            text = color + text + Logger.END
+        print(Logger.bold(text))
+
+    @staticmethod
+    def print_title(text, char='*', length=5):
+        if Logger.LEVEL > Logger.TITLE:
+            return
+        print(Logger.title(text, char, length))
+
+    @staticmethod
+    def warn(text):
+        if Logger.LEVEL > Logger.WARNING:
+            return
+        print('Warning: ' + Logger.yellow(text))
+
+    @staticmethod
+    def error(text):
+        if Logger.LEVEL > Logger.ERROR:
+            return
+        print('Error: ' + Logger.red(text))
+
+    ### decorator methods ###
+
     @staticmethod
     def title(text, char='*', length=5):
         return f"\n{char * length} {Logger.bold(text)} {char * length}\n"
-
-    @staticmethod
-    def print_title(text):
-        print(Logger.title(text))
 
     @staticmethod
     def divider(char='=', length=50) -> str:
@@ -39,6 +91,10 @@ class Logger:
 
     @staticmethod
     def cyan(text) -> str:
+        return f"{Logger.CYAN}{text}{Logger.END}"
+
+    @staticmethod
+    def dark_cyan(text) -> str:
         return f"{Logger.CYAN}{text}{Logger.END}"
 
     @staticmethod
