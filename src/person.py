@@ -46,13 +46,19 @@ class Person:
     def is_female(self):
         return self.basic_attrs.gender == 'Female'
 
-    def get_pronoun(self):
+    def get_pronoun(self, belong=False):
         pronoun_dict = {
             'Male': 'he',
             'Female': 'she',
             'Others': 'they'
         }
-        return pronoun_dict[self.basic_attrs.gender]
+        pronoun_dict_belong = {
+            'Male': 'his',
+            'Female': 'her',
+            'Others': 'their'
+        }
+        dic = pronoun_dict_belong if belong else pronoun_dict
+        return dic[self.basic_attrs.gender] 
 
     # TODO get other types of pronoun his her
 

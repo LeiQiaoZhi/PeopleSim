@@ -27,13 +27,18 @@ class History:
     def log_match_result(self, match_result):
         self.social_history['match_result'].append(match_result)
 
-    def to_string(self) -> str:
+    def get_success_match_num(self):
+        success = filter(
+            lambda result: result['result'] == 'Match found', self.social_history['match_result'])
+        return len(list(success))
+
+    def to_string(self, detail_level='summary') -> str:
         title = Logger.title(
             f"History of {Logger.yellow(self.person.get_full_name())}", char='=', length=10)
         description = self.person.get_description(
             detail_level='full', bounds=False)
 
-        social_msgs = []
+        full_social_msgs = []
         for step in range(len(self.social_history['num_socials'])):
             acq = self.social_history['acquaintances'][step]
             target = self.social_history['targets'][step]
@@ -47,7 +52,7 @@ class History:
                           f"with social level {self.person.mental_attrs.social_level:.2f} "
                           f"decides to socialize with {Logger.bold(num_social)} people, "
                           f"and made {Logger.bold(len(acq))} aquaintances."
-                          f"\n{self.person.get_pronoun()} target is {Logger.cyan(target) if target != None else 'None'}"
+                          f"\n{self.person.get_pronoun(belong=True)} target is {Logger.cyan(target) if target != None else 'None'}"
                           )
 
             result_msg_dict = {
@@ -57,14 +62,14 @@ class History:
                      f"with a score of {Logger.bold(match_result['target target score'])}, "
                      f"while your score is {Logger.bold(match_result['self score'])}"),
                 'Match found':
-                    (f"{Logger.cyan(target)} is {Logger.yellow(self.person.get_full_name())}"
+                    (f"{Logger.cyan(target)}'s target is {Logger.yellow(self.person.get_full_name())}"
                      f"\n{Logger.bold('Match made!')}"),
                 'No target':
                     f"No target :("
             }
 
             # print(match_result)
-            social_msgs.append(
+            full_social_msgs.append(
                 social_msg + '\n' + result_msg_dict[match_result['result']])
 
         if self.person.is_alive():
@@ -74,15 +79,20 @@ class History:
                 f"at age {self.person.basic_attrs.get_age_in_years()}"\
                 f", cause: {self.death['cause']}"
 
-        social_history = Logger.title(
-            "Social History", char='=')+'\n'.join(social_msgs)
+        social_summary = Logger.title("Social Summary", char='-', length=3) + \
+            Logger.bold(
+            f"In total, {self.person.get_pronoun()} has {Logger.blue(self.get_success_match_num())} successful matches")
+        social_history_dict = {
+            'full':
+                Logger.title("Social History", char='=') +
+                '\n'.join(full_social_msgs) + '\n' + social_summary, 'summary': social_summary}
         death_msg = Logger.title("Status", char='=') + \
             Logger.blue(death_msg)
 
         msg = [
             title,
             description,
-            social_history,
+            social_history_dict[detail_level],
             death_msg,
         ]
         return '\n'.join(msg)

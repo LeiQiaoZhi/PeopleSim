@@ -41,4 +41,5 @@ def get_num_ppl_to_socialize(mental_attrs: MentalAttributes):
     base on the person's social level
     '''
     social_level = mental_attrs.social_level
-    return max(0, round(random.normalvariate(social_level*5, 1)))
+    mean_social = U.sigmoid(social_level, mid_point=1, rate=0.2) * 10
+    return max(0, round(random.normalvariate(mean_social, 0.5)))
