@@ -1,4 +1,3 @@
-# TODO: create instance, keep a dict of {person: history}, can print out histories
 from typing import *
 from utils.logger import Logger
 from attributes import *

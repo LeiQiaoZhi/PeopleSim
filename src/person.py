@@ -54,6 +54,8 @@ class Person:
         }
         return pronoun_dict[self.basic_attrs.gender]
 
+    # TODO get other types of pronoun his her
+
     def get_full_name(self):
         return f"{self.basic_attrs.given_name} {self.basic_attrs.surname}"
 

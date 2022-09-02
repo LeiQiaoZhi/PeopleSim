@@ -1,7 +1,5 @@
 from turtle import title
 
-# TODO: create instance that can change log level
-
 
 class Logger:
     PURPLE = '\033[95m'

@@ -17,6 +17,8 @@ class Standard:
         self.score_fn = score_fn
         self.std_name = std_name
 
+# TODO: Gender Standard
+
 
 class AttractivenessStandard(Standard):
     @staticmethod

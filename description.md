@@ -33,5 +33,5 @@ TODO: if old enough, look for spouse
 - base on critireas, rank spouses for score
 - base on social_level, know other people, and give 
 
-TODO: gather population data
+gather population data
 - number of population alive
