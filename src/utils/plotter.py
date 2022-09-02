@@ -6,11 +6,12 @@ from utils.logger import Logger
 
 
 class PlotData:
-    def __init__(self, xlabel, ylabel) -> None:
+    def __init__(self, xlabel, ylabel, kwargs={}) -> None:
         self.X = []
         self.Y = []
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.kwargs = kwargs
 
     def add_entry(self, x, y):
         self.X.append(x)
@@ -30,7 +31,7 @@ class LineData(PlotData):
 
     def plot(self, title=""):
         fig, ax = plt.subplots()
-        ax.plot(self.X, self.Y)
+        ax.plot(self.X, self.Y, **self.kwargs)
         ax.set_xlabel(self.xlabel)
         ax.set_ylabel(self.ylabel)
         ax.set_title(title)
@@ -44,7 +45,7 @@ class ScatterData(PlotData):
 
     def plot(self, title=""):
         fig, ax = plt.subplots()
-        ax.scatter(self.X, self.Y, s=2)
+        ax.scatter(self.X, self.Y, **self.kwargs)
         ax.set_xlabel(self.xlabel)
         ax.set_ylabel(self.ylabel)
         ax.set_title(title)
@@ -58,17 +59,17 @@ class Plotter:
     def __init__(self) -> None:
         self.plot_data: Dict[str, PlotData] = {}
 
-    def add_scatter(self, graph_name, x, y, xlabel="", ylabel="") -> None:
+    def add_scatter(self, graph_name, x, y, xlabel="", ylabel="", kwargs={}) -> None:
         if graph_name not in self.plot_data.keys():
-            self.plot_data[graph_name] = ScatterData(xlabel, ylabel)
+            self.plot_data[graph_name] = ScatterData(xlabel, ylabel, kwargs)
         self.plot_data[graph_name].add_entry(x, y)
 
-    def add_scalar(self, graph_name, x, y, xlabel="", ylabel="") -> None:
+    def add_scalar(self, graph_name, x, y, xlabel="", ylabel="", kwargs={}) -> None:
         '''
         for normal line plots
         '''
         if graph_name not in self.plot_data.keys():
-            self.plot_data[graph_name] = LineData(xlabel, ylabel)
+            self.plot_data[graph_name] = LineData(xlabel, ylabel, kwargs)
         self.plot_data[graph_name].add_entry(x, y)
 
     def plot(self) -> None:
