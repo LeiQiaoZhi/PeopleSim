@@ -102,7 +102,7 @@ class PhysicalAttributes:
 
     @staticmethod
     def _get_random_attractiveness():
-        return random.normalvariate(0.5, 0.2)
+        return min(1, max(0, random.normalvariate(0.5, 0.2)))
 
 
 class MentalAttributes:

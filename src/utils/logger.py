@@ -48,10 +48,11 @@ class Logger:
         print(Logger.bold(text))
 
     @staticmethod
-    def print_title(text, char='*', length=5):
+    def print_title(text, char='*', length=5, total_length=None, divider: str = ""):
         if Logger.LEVEL > Logger.TITLE:
             return
-        print(Logger.title(text, char, length))
+        print(Logger.title(text, char,
+              length, total_length=total_length, divider=divider))
 
     @staticmethod
     def warn(text):
@@ -68,12 +69,14 @@ class Logger:
     ### decorator methods ###
 
     @staticmethod
-    def title(text, char='*', length=5):
-        return f"\n{char * length} {Logger.bold(text)} {char * length}\n"
+    def title(text, char='*', length=5, total_length=None, divider=""):
+        if total_length != None and len(text) <= total_length:
+            length = (total_length - len(text) - 2) // (2*len(char))
+        return f"{divider}\n{char * length} {Logger.bold(text)} {char * length}\n{divider}"
 
     @staticmethod
     def divider(char='=', length=50) -> str:
-        return char * 50
+        return char * (length // len(char))
 
     @staticmethod
     def bold(text) -> str:
@@ -106,3 +109,7 @@ class Logger:
     @staticmethod
     def red(text) -> str:
         return f"{Logger.RED}{text}{Logger.END}"
+
+    @staticmethod
+    def green(text) -> str:
+        return f"{Logger.GREEN}{text}{Logger.END}"

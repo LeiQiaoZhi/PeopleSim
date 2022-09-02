@@ -34,7 +34,7 @@ class History:
 
     def to_string(self, detail_level='summary') -> str:
         title = Logger.title(
-            f"History of {Logger.yellow(self.person.get_full_name())}", char='=', length=10)
+            f"History of {Logger.yellow(self.person.get_full_name())}", char='=', total_length=70)
         description = self.person.get_description(
             detail_level='full', bounds=False)
 
@@ -88,12 +88,15 @@ class History:
                 '\n'.join(full_social_msgs) + '\n' + social_summary, 'summary': social_summary}
         death_msg = Logger.title("Status", char='=') + \
             Logger.blue(death_msg)
+        end = Logger.title(
+            f"End of history of {Logger.yellow(self.person.get_full_name())}", char='=', total_length=70)
 
         msg = [
             title,
             description,
             social_history_dict[detail_level],
             death_msg,
+            end
         ]
         return '\n'.join(msg)
 

@@ -1,16 +1,19 @@
+from ast import While
 from person import *
 import argparse
 # from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
 import utils.plotter
 from utils.history_logger import HistoryLogger
+from utils.command_parser import CommandParser
+
 history_logger = HistoryLogger()
 
-# writer = SummaryWriter()
 plotter = utils.plotter.Plotter()
 Logger.set_level(Logger.IMPORTANT)
 
-def simulation_step(step,people):
+
+def simulation_step(step, people):
     Logger.print_title(f"Begining of loop {step}", char='=', length=10)
     num_match = 0
 
@@ -31,13 +34,13 @@ def simulation_step(step,people):
         history_logger.log_socialize_history(person, num_social)
 
         # add data to plots
-        kwargs = {'s':4,'alpha':0.2}
+        kwargs = {'s': 4, 'alpha': 0.2}
         plotter.add_scatter("num social vs social level", person.mental_attrs.social_level,
-                            num_social, xlabel="social_level", ylabel="num_social" ,kwargs=kwargs)
+                            num_social, xlabel="social_level", ylabel="num_social", kwargs=kwargs)
         plotter.add_scatter("num acquaint vs social level", person.mental_attrs.social_level,
-                            num_acquaint, xlabel="social_level", ylabel="num_acquaint",kwargs=kwargs)
+                            num_acquaint, xlabel="social_level", ylabel="num_acquaint", kwargs=kwargs)
         plotter.add_scatter("num acquaint vs num social", x=num_social,
-                            y=num_acquaint, xlabel="num_social", ylabel="num_acquaint",kwargs=kwargs)
+                            y=num_acquaint, xlabel="num_social", ylabel="num_acquaint", kwargs=kwargs)
 
     for person in people:
         person.rank_acquaintances(people)
@@ -57,15 +60,16 @@ def simulation_step(step,people):
 
     # Population wide stats
     plotter.add_scalar('Population', y=len(people), x=step,
-                        xlabel='steps', ylabel='population')
+                       xlabel='steps', ylabel='population')
     plotter.add_scalar('Match found', y=num_match, x=step,
-                        xlabel='steps', ylabel='matchs found')
+                       xlabel='steps', ylabel='matchs found')
 
     Logger.print_title("Stats")
     Logger.important(
         f"Total match found is {Logger.blue(num_match)} ({num_match//2} pairs)")
     Logger.important(f"Population size is {Logger.blue(len(people))}")
     # NOTE: end of step
+
 
 def main():
     ### Parse Arguments ###
@@ -75,7 +79,6 @@ def main():
 
     args, _ = parser.parse_known_args()
     print(args)
-
 
     ### Start of Dawn ###
     # create starting population
@@ -88,32 +91,34 @@ def main():
 
     Logger.important(f"{args.start_pop} people created")
 
-
     ### Simulation Loop ###
     for step in range(args.sim_loop):
-        simulation_step(step,people)
-
+        simulation_step(step, people)
 
     ### log end of simulation stats ###
-    kwargs = {'s':4,'alpha':0.6}
+    kwargs = {'s': 4, 'alpha': 0.6}
     for pid, history in history_logger.history_dict.items():
-        plotter.add_scatter('match made vs social level',y=history.get_success_match_num(), x=history.person.mental_attrs.social_level,
-            xlabel='social level',ylabel='match made',kwargs=kwargs)
-        plotter.add_scatter('match made vs attractiveness',y=history.get_success_match_num(), x=history.person.physical_attrs.attractiveness,
-            xlabel='attractiveness',ylabel='match made',kwargs=kwargs)
-        plotter.add_scatter('match made vs age',y=history.get_success_match_num(), x=history.person.basic_attrs.get_age_in_years(),
-            xlabel='age',ylabel='match made',kwargs=kwargs)
-        plotter.add_scatter('match made vs height',y=history.get_success_match_num(), x=history.person.physical_attrs.height,
-            xlabel='height',ylabel='match made',kwargs=kwargs)
+        plotter.add_scatter('match made vs social level', y=history.get_success_match_num(), x=history.person.mental_attrs.social_level,
+                            xlabel='social level', ylabel='match made', kwargs=kwargs)
+        plotter.add_scatter('match made vs attractiveness', y=history.get_success_match_num(), x=history.person.physical_attrs.attractiveness,
+                            xlabel='attractiveness', ylabel='match made', kwargs=kwargs)
+        plotter.add_scatter('match made vs age', y=history.get_success_match_num(), x=history.person.basic_attrs.get_age_in_years(),
+                            xlabel='age', ylabel='match made', kwargs=kwargs)
+        plotter.add_scatter('match made vs height', y=history.get_success_match_num(), x=history.person.physical_attrs.height,
+                            xlabel='height', ylabel='match made', kwargs=kwargs)
 
     # DONE: make the plt somewhere else
     plotter.plot()
 
     Logger.print_title("End of simulation", char='=', length=10)
 
-    history_logger.print_history(people[0].id)
-
-
+    ### Command ###
+    command_parser = CommandParser.get_default_parser(people, history_logger)
+    Logger.print_title("CMD LINE ENV", char='-', total_length=80,
+                       divider=Logger.divider(char='-', length=80))
+    while True:
+        command_txt = input(f"{Logger.bold(Logger.green('$ Command'))}: ")
+        command_parser.parse_command(command_txt)
 
 
 if __name__ == '__main__':
